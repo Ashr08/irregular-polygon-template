@@ -36,7 +36,7 @@ public class TestSuite {
         for (double[] point : points)
         {
             //System.out.println("  Adding point: " + Arrays.toString(point));
-            poly.add(new Point2D.Double(point[0], point[1]));
+            poly.addPoint(new Point2D.Double(point[0], point[1]));
         }
         poly.draw();
 

@@ -1,73 +1,84 @@
-import java.awt.geom.*; // for Point2D.Double
-import java.util.ArrayList; // for ArrayList
-import java.util.concurrent.TimeUnit;
+import java.awt.geom.*;
+import java.util.*;
+import gpdraw.*;
+import java.awt.Color;
 
-import gpdraw.*; // for DrawingTool
+public class IrregularPolygon
+{
+    DrawingTool brush;
+    SketchPad canvas;
+    private ArrayList <Point2D.Double> myPolygon;
+    
+    public IrregularPolygon()
+    {
+       canvas = new SketchPad(600, 400);
+       brush = new DrawingTool(canvas);
+       myPolygon = new ArrayList<Point2D.Double>();
+    }
 
-
-public class IrregularPolygon {
-    private ArrayList<Point2D.Double> myPolygon = new ArrayList<Point2D.Double>();
-
-    // constructor
-    public IrregularPolygon() {}
-
-    // public methods
-    public void add(Point2D.Double aPoint) {
+    public static Point2D.Double createPoint(double x, double y)
+    {
+        return new Point2D.Double(x,y);
+    }
+    
+    public void addPoint(Point2D.Double aPoint) 
+    {
         myPolygon.add(aPoint);
     }
     
+    public void addCoordinates(double x, double y)
+    {
+        Point2D.Double aPoint = new Point2D.Double(x,y);
+        myPolygon.add(aPoint);
+    }
 
-    public double perimeter() {
-        double perimeter = 0.0;
-        
-        for (int i = 0; i < myPolygon.size(); i++) {
-            Point2D.Double current = myPolygon.get(i);
-            Point2D.Double next = myPolygon.get((i + 1) % myPolygon.size()); // Wrap around to the first point
-            
-            // Calculate distance between current and next
-            double dx = next.getX() - current.getX();
-            double dy = next.getY() - current.getY();
-            perimeter += Math.sqrt(dx * dx + dy * dy);
-        }
-        
-        return perimeter;
+    public void addSampleData()
+    {
+        myPolygon.add(createPoint(20.0,10.0));
+        myPolygon.add(createPoint(70.0,20.0));
+        myPolygon.add(createPoint(50.0,50.0));
+        myPolygon.add(createPoint(0.0,40.0));
     }
     
-
-    public double area() {
-        double area = 0.0;
-        
-        for (int i = 0; i < myPolygon.size(); i++) {
-            Point2D.Double current = myPolygon.get(i);
-            Point2D.Double next = myPolygon.get((i + 1) % myPolygon.size()); // Wrap around to the first point
-            
-            // Shoelace formula part
-            area += current.getX() * next.getY() - current.getY() * next.getX();
+    public void draw()
+    {
+        brush.up();
+        brush.move(myPolygon.get(0).getX(), myPolygon.get(0).getY());
+        brush.down();
+ 
+        for(int i = 1; i < myPolygon.size(); i++)
+        {
+            brush.move(myPolygon.get(i).getX(), myPolygon.get(i).getY());
         }
-        
-        return Math.abs(area) / 2.0;
+        brush.move(myPolygon.get(0).getX(), myPolygon.get(0).getY());
     }
     
-
-    public void draw() {
-        try {
-            DrawingTool pen = new DrawingTool(new SketchPad(500, 500));
-            pen.penDown();
-            
-            for (int i = 0; i < myPolygon.size(); i++) {
-                Point2D.Double current = myPolygon.get(i);
-                Point2D.Double next = myPolygon.get((i + 1) % myPolygon.size()); // Wrap around to the first point
-                
-                pen.move(current.getX(), current.getY());
-                pen.move(next.getX(), next.getY());
-            }
-            
-            pen.penUp(); // Lift pen after drawing
-        } catch (java.awt.HeadlessException e) {
-            System.out.println("Exception: No graphics support available.");
-        }
+    private double distance(int a, int b)
+    {
+        return Math.sqrt(Math.pow((myPolygon.get(a).getX() - myPolygon.get(b).getX()),2) 
+        + Math.pow((myPolygon.get(a).getY() - myPolygon.get(b).getY()),2));
     }
     
+    public double perimeter()
+    {
+        double rim = distance(0, myPolygon.size()-1);
+        for(int i = 1; i < myPolygon.size(); i++)
+            rim += distance(i, i-1);
+        
+        return rim;
+    }
 
-    
+    public double area() 
+    {
+        double a1 = (myPolygon.get(myPolygon.size()-1).getX() * myPolygon.get(0).getY());
+        double a2 = (myPolygon.get(myPolygon.size()-1).getY() * myPolygon.get(0).getX());
+        for(int i = 1; i < myPolygon.size(); i++)
+        {
+            a1 += (myPolygon.get(i - 1).getX() * myPolygon.get(i).getY());
+            a2 += (myPolygon.get(i - 1).getY() * myPolygon.get(i).getX());
+        }
+        
+        return Math.abs((a1-a2)/2);
+    }
 }
+
