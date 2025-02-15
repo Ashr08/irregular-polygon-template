@@ -35,9 +35,19 @@ public class IrregularPolygon {
     
 
     public double area() {
-        // TODO: Calculate the area.
-        return 0.0;
+        double area = 0.0;
+        
+        for (int i = 0; i < myPolygon.size(); i++) {
+            Point2D.Double current = myPolygon.get(i);
+            Point2D.Double next = myPolygon.get((i + 1) % myPolygon.size()); // Wrap around to the first point
+            
+            // Shoelace formula part
+            area += current.getX() * next.getY() - current.getY() * next.getX();
+        }
+        
+        return Math.abs(area) / 2.0;
     }
+    
 
     public void draw()
     {
